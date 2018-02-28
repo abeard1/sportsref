@@ -120,7 +120,7 @@ def parse_table(table, flatten=True, footer=False):
     # pos -> position
     if 'pos' in df.columns:
         df.rename(columns={'pos': 'position'}, inplace=True)
-
+  
     # boxscore_word, game_date -> boxscore_id and separate into Y, M, D columns
     for bs_id_col in ('boxscore_word', 'game_date', 'box_score_text'):
         if bs_id_col in df.columns:
@@ -163,6 +163,16 @@ def parse_table(table, flatten=True, footer=False):
             df = pd.concat((df, date_df), axis=1)
         else:
             df.rename(columns={'date_game': 'boxscore_id'}, inplace=True)
+
+    # edge case for euro - if multiple boxscore_ids, keep first
+    l = [i for i,col in enumerate(list(df.columns.values)) if col == 'boxscore_id']
+    if len(l) > 1:
+        # keep first occurrence
+        l.pop(0)
+        for i in l:
+            df.drop(df.columns[i], axis=1)
+
+        
 
     # game_location -> is_home
     if 'game_location' in df.columns and flatten:
