@@ -165,14 +165,16 @@ def parse_table(table, flatten=True, footer=False):
             df.rename(columns={'date_game': 'boxscore_id'}, inplace=True)
 
     # edge case for euro - if multiple boxscore_ids, keep first
-    l = [i for i,col in enumerate(list(df.columns.values)) if col == 'boxscore_id']
-    if len(l) > 1:
-        # keep first occurrence
-        l.pop(0)
-        for i in l:
-            df.drop(df.columns[i], axis=1)
+    boxscore_cols = [i for i,col in enumerate(list(df.columns.values)) if col == 'boxscore_id']
 
+    if len(boxscore_cols) > 1:
+        # keep first occurrence
+        boxscore_cols.pop(0)
         
+        # generate col indices to be kept
+        col_nums = [x for x in range(len(df.columns)) if x not in boxscore_cols]
+        
+        df = df.iloc[:,col_nums]
 
     # game_location -> is_home
     if 'game_location' in df.columns and flatten:
