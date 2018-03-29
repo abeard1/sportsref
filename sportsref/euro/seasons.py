@@ -118,9 +118,14 @@ class Season(future.utils.with_metaclass(sportsref.decorators.Cached, object)):
         doc = self.get_main_doc()
         table = doc(selector)
         df = sportsref.utils.parse_table(table)
-        df['team_name_season'] = df['team_name_season'].apply(lambda x: x.split('/')[3])
-        df.rename(columns={'team_name_season' : 'team_id'}, inplace=True)
-        df.set_index('team_id', inplace=True)
+        # fix for eurocup/euroleague
+        try:
+            df['team_name_season'] = df['team_name_season'].apply(lambda x: x.split('/')[3])
+            df.rename(columns={'team_name_season' : 'team_id'}, inplace=True)
+            df.set_index('team_id', inplace=True)
+        except IndexError:
+            pass            
+
         return df
 
     def standings(self):
